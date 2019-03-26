@@ -3,7 +3,7 @@
 
 I created this project to explore deploying to EB ( Elastic Beanstalk ) with a multi docker container deploy via GitLab CI / CD pipeline, This includes the private Docker Container Repo on GitLab while using the public Gitlab "runners".<br><br>
 
-Project consists of a CRA ( Create React App ), very simple implementation, Nginx for routing, NodeJs server, A "Worker" that simply manages a task, Database with mySQL, Redish to simply hold a single float value and display it when requested.
+Project consists of a CRA ( Create React App ), very simple implementation, Nginx for routing, NodeJs server, A "Worker" that simply manages a task, Database with mySQL, Redis to simply hold a single float value and display it when requested.
 
 ## Pain Points
 
