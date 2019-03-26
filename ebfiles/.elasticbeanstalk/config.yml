@@ -1,0 +1,23 @@
+branch-defaults:
+  default:
+    environment: MultiDocker-env-1
+environment-defaults:
+  MultiDocker-env-1:
+    branch: null
+    repository: null
+global:
+  application_name: multi-docker
+  default_ec2_keyname: null
+  default_platform: arn:aws:elasticbeanstalk:us-east-1::platform/Multi-container Docker
+    running on 64bit Amazon Linux/2.11.7
+  default_region: us-east-1
+  include_git_submodules: true
+  instance_profile: null
+  platform_name: null
+  platform_version: null
+  profile: eb-cli
+  sc: null
+  workspace_type: Application
+  
+deploy:
+  artifact: Dockerrun.aws.json

@@ -1,0 +1,104 @@
+ image: docker:stable
+
+ variables:
+   # When using dind service we need to instruct docker, to talk with the
+   # daemon started inside of the service. The daemon is available with
+   # a network connection instead of the default /var/run/docker.sock socket.
+   #
+   # The 'docker' hostname is the alias of the service container as described at
+   # https://docs.gitlab.com/ee/ci/docker/using_docker_images.html#accessing-the-services
+   #
+   # Note that if you're using Kubernetes executor, the variable should be set to
+   # tcp://localhost:2375 because of how Kubernetes executor connects services
+   # to the job container
+   DOCKER_HOST: tcp://docker:2375/
+   # When using dind, it's wise to use the overlayfs driver for
+   # improved performance.
+   DOCKER_DRIVER: overlay2
+
+ stages:
+  - test
+  - deploy:gitlab
+  # - deploy:docker
+
+ services:
+   - docker:dind
+
+ before_script:
+   - docker info
+
+ test:
+   stage: test
+   only:
+    variables:
+      - $CI_PIPELINE_SOURCE == "web"
+      - $CI_COMMIT_REF_NAME == "master"
+   script:
+     - docker version
+     - docker build -t slaterbbx/docker-complex -f ./client/Dockerfile.dev ./client
+     # --coverage is used so that the test is closed and returned a value, this is specific to CRA
+     - docker run slaterbbx/docker-complex npm test -- --coverage
+     
+
+ deploy:gitlab:
+   stage: deploy:gitlab
+   only:
+    variables:
+      - $CI_PIPELINE_SOURCE == "web"
+      - $CI_COMMIT_REF_NAME == "master"
+   script:
+     - docker version
+     
+     - docker build -t $CI_REGISTRY_IMAGE/multi-client ./client
+     - docker build -t $CI_REGISTRY_IMAGE/multi-nginx ./nginx
+     - docker build -t $CI_REGISTRY_IMAGE/multi-api ./api
+     - docker build -t $CI_REGISTRY_IMAGE/multi-worker ./worker
+     # Safely login to local GitLab Docker Container Repo
+     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin
+     # Pushes to local GitLab Docker Container Repo
+     - docker push $CI_REGISTRY_IMAGE/multi-client
+     - docker push $CI_REGISTRY_IMAGE/multi-nginx
+     - docker push $CI_REGISTRY_IMAGE/multi-api
+     - docker push $CI_REGISTRY_IMAGE/multi-worker
+
+     - docker build -f Dockerfile.ebs -t slaterbbx/aws .
+
+## NOTE: This is for deploying your Docker Images to docker.com instead of GitLab Repo
+
+#  deploy:docker:
+#    stage: deploy:docker
+#    only:
+#     variables:
+#       - $CI_PIPELINE_SOURCE == "web"
+#       - $CI_COMMIT_REF_NAME == "master"
+#    script:
+#      - docker version 
+
+#      - docker build -t slaterbbx/multi-client ./client
+#      - docker build -t slaterbbx/multi-nginx ./nginx
+#      - docker build -t slaterbbx/multi-api ./server
+#      - docker build -t slaterbbx/multi-worker ./worker
+
+#      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+
+#      - docker push slaterbbx/multi-client
+#      - docker push slaterbbx/multi-nginx
+#      - docker push slaterbbx/multi-api
+#      - docker push slaterbbx/multi-worker
+
+#      - docker build -f Dockerfile.ebs -t slaterbbx/aws .
+
+# https://github.com/drootnar/gitlab-cd-docker-aws-eb-example/blob/master/.gitlab-ci.yml
+# Same method but this is how it would be done on TravisCI
+#  deploy: 
+    #     provider: elasticbeanstalk
+    #     region: "us-east-1"
+    #     app: "dockerworkflow"
+    #     env: "Dockerworkflow-env"
+    #     bucket_name: "elasticbeanstalk-us-east-1-162922809139"
+    #     bucket_path: "dockerworkflow"
+    #     on: 
+    #       branch: master
+    #     access_key_id: $AWS_ACCESS_KEY
+    #     secret_access_key:
+    #         secure: "c" 

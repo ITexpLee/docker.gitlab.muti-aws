@@ -1,0 +1,38 @@
+{
+    "AWSEBDockerrunVersion": 2,
+    "containerDefinitions": [{
+            "memoryReservation": 128,
+            "name": "client",
+            "image": "slaterbbx/multi-client:latest",
+            "hostname": "client",
+            "essential": false
+        },
+        {
+            "memoryReservation": 128,
+            "name": "api",
+            "image": "slaterbbx/multi-api:latest",
+            "hostname": "api",
+            "essential": false
+        },
+        {
+            "memoryReservation": 128,
+            "name": "worker",
+            "image": "slaterbbx/multi-worker:latest",
+            "hostname": "worker",
+            "essential": false
+        },
+        {
+            "memoryReservation": 128,
+            "name": "nginx",
+            "image": "slaterbbx/multi-nginx:latest",
+            "essential": true,
+            "portMappings": [
+                {
+                    "hostPort": 80,
+                    "containerPort": 80
+                }
+            ],
+            "links": ["client", "api"]
+        }
+    ]
+}
