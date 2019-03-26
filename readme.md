@@ -14,7 +14,7 @@ I ran into a few pain points in the process that made this project worthy of an 
 
 ## Solutions
 
-In the end, I had to create a time consuming / somewhat difficult workaround to use the public Gitlab "runners". I basically had setup a container then install the credentials into that for the AWS CLI, then import the credentials files from the outside. It took some work to figure out how the credentials files shape looked. Once I did, I created a folder in "ebfiles" where I setup the required creds for deployment.<br>
+In the end, I had to create a time consuming / somewhat difficult workaround to use the public Gitlab "runners". I basically had to setup a container then import the credentials into that. I had to create this container so that I could install the AWS CLI for deployment, this was needed because of the limitations of DIND or "Docker in Docker". It took some work to figure out how the credentials files shape looked. Once I did, I created a folder in "ebfiles" where I setup the required creds for deployment.<br>
 
 ## Conclusion
 
